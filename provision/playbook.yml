@@ -1,0 +1,22 @@
+- hosts: all
+  sudo: yes
+  remote_user: vagrant
+
+  tasks:
+  - name: Actualizacion
+    command: sudo apt-get update
+
+  - name: Instalar Python
+    command: sudo apt-get install python3
+
+  - name: Instalar Pip
+    command: sudo apt-get install python3-pip
+
+  - name: Instalar Git
+    command: sudo apt-get install git
+
+  - name: Instalar Requerimientos
+    command: pip3 install -r ProyectoIV-BOT/requirements.txt
+
+
+
