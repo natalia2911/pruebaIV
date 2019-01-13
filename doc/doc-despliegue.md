@@ -11,6 +11,15 @@ Nos logeamos :
 
 ![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/login.png)
 
+A continuación tendremos que crear un grupo de recursos que más tarde especificaremos en nuestro fichero vagrantfile, en este caso nuestro grupo de recursos se llamará **ProyectoNoticieroApp**
+
+![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/gruporecursos.png)
+
+Ahora procedemos a crear el servicio principal (Explicado en pasos posteriores)
+Seleccionamos nuestra subscripción, en este caso la proporcionada por el profesor, para el hito 5:
+
+`az account set --subscription <ID SUBSCRIPCIÓN>`
+
 ##  Máquina Virtual: Vagrant
 
 Para crear y desplegar nuestra aplicación necesitaremos una máquina virtual, en este caso hemos utilizado Vagrant con un plugin de Azure para ello.
@@ -37,29 +46,29 @@ Vagrant.configure("2") do |config|
   # Le especificamos la clave, para la conexión mediante ssh de la máquina.
 	config.ssh.private_key_path = "~/.ssh/id_rsa"
 
-  # Configuración de la máquina (proveedor) donde vamos a crear el host de la máquina:
+  	# Configuración de la máquina (proveedor) donde vamos a crear el host de la máquina:
 	config.vm.provider :azure do |noticiero, override|
 
-        # Variables de entorno y parametros, necesarios para crear nuestra máquina con Azure.
-    		noticiero.tenant_id = ENV['AZURE_TENANT_ID']  # Tenant id
-    		noticiero.client_id = ENV['AZURE_CLIENT_ID'] #Id del cliente de azure
-    		noticiero.client_secret = ENV['AZURE_CLIENT_SECRET']  #Contraseña de del cliente de azure
-    		noticiero.subscription_id = ENV['AZURE_SUBSCRIPTION_ID']  #Subscripción de Azure.
+		# Variables de entorno y parámetros, necesarios para crear nuestra máquina con Azure.
+	    	noticiero.tenant_id = ENV['AZURE_TENANT_ID']  # Tenant id
+	    	noticiero.client_id = ENV['AZURE_CLIENT_ID'] #Id del cliente de azure
+	    	noticiero.client_secret = ENV['AZURE_CLIENT_SECRET']  #Contraseña de del cliente de azure
+	    	noticiero.subscription_id = ENV['AZURE_SUBSCRIPTION_ID']  #Subscripción de Azure.
 
-        # Tamaño de los recursos de Azure
-		    noticiero.vm_size = "Standard_A0"
-        # Localización donde queremos el host, o la granja de servidores donde
-        # nos asignan la máquina
-		    noticiero.location = "westeurope"
-        #Abrimos el puerto 80, que es el que vamos a utilizar
-		    noticiero.tcp_endpoints = "80"
-        #Nombre de la máquina virtual
-		    noticiero.vm_name = "noticieroapp"
-        #Especificamos la imagen que vamos a montar en nuestra máquina, en este caso Ubuntu 16.04
-        noticiero.vm_image_urn = 'Canonical:UbuntuServer:16.04-LTS:latest'
-        #Grupo de recursos en los que se creará la máquina.
-        noticiero.resource_group_name = 'ProyectoNoticiero'
-  end
+		# Tamaño de los recursos de Azure
+		noticiero.vm_size = "Standard_A0"
+		# Localización donde queremos el host, o la granja de servidores donde
+		# nos asignan la máquina
+		noticiero.location = "westeurope"
+		#Abrimos el puerto 80, que es el que vamos a utilizar
+		noticiero.tcp_endpoints = "80"
+		#Nombre de la máquina virtual
+		noticiero.vm_name = "noticiero"
+		#Especificamos la imagen que vamos a montar en nuestra máquina, en este caso Ubuntu 16.04
+		noticiero.vm_image_urn = 'Canonical:UbuntuServer:16.04-LTS:latest'
+		#Grupo de recursos en los que se creará la máquina.
+		noticiero.resource_group_name = 'ProyectoNoticieroApp'
+	  end
 
   # Configuración del provisionamiento con ansible, con nuestro fichero de playbook.yml
   # Durante el vagrant up, nos permite que el fichero playbook.yml nos instale las dependencias que necesita
@@ -69,8 +78,8 @@ Vagrant.configure("2") do |config|
 	end
 end
 ```
-Vamos a proceder a explicar cada uno de los diferentes parametros de configuración que hemos incluido en nuestro Vagrantfile:
-
+Vamos a proceder a explicar cada uno de los diferentes parámetros de configuración que hemos incluido en nuestro Vagrantfile:
+--
 - **config.vm.box** : que nos especifica el box que vamos a utilizar en la máquina virtual; tendremos que elegir uno predefinido o crear uno.
 ```
 vagrant box add noticieroapp https://github.com/azure/vagrant-azure/raw/v2.0/dummy.box --provider azure
@@ -89,19 +98,19 @@ vagrant box add noticieroapp https://github.com/azure/vagrant-azure/raw/v2.0/dum
 
 	Variables de entorno y parámetros, necesarios para crear nuestra máquina con Azure.
 
-	Para obtener los tres primeros datos ejecutaremos
+	Para obtener los tres primeros datos, tendremos que crear el service principal, estos valores cambian cada vez que se crea una nueva máquina:
 	```
-	az ad sp create-for-rbac
+	az ad sp create-for-rbac -n noticieroapp --role contributor
 	```
-	Por terminal nos aparecerá algo así:
-![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/datos.png)
 
-	Para obtener la suscripción :
-	```
-	az account list --query "[?isDefault].id" -o tsv
-	```
-![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/subscripcion.png)
+	Para obtener la suscripción, cuando hicimos `az login` la obtuvimos.
+	Tendremos que generar unas variables de entorno, que tendremos que exportar.
 
+			export AZURE_CLIENT_ID="valor"
+			export AZURE_TENANT_ID="valor"
+			export AZURE_CLIENT_SECRET="valor"
+			export AZURE_SUBSCRIPTION_ID="valor"
+	Para que estas variables se queden de modo permanente tendremos que ponerlas en el archivo : `.bashrc`
 -	**noticiero.vm_size**: tamaño de los recursos de Azure, en nuestro caso hemos elegido *Standard_A0* ya que es uno de los más básicos y báratos, y se adapta a nuestra necesidades. Tiene 1 core, 0.75 GiB y cuesta 0.02$/hora. Tenemos más aquí : https://azureprice.net/ los podemos elegir también dependiendo de la localización de las granjas.
 -	**noticiero.location**: localización donde queremos el host, o la granja de servidores donde nos van a asignar la máquina.
 - **noticiero.tcp_endpoints** : especificamos el puerto 80, que es el que abrimos, por que de momento, solo vamos a usar este.
@@ -121,22 +130,85 @@ vagrant up --provider=azure
 ## Provisionamiento: Ansible
 
 Crearemos el archivo de provisionamiento para la máquina, donde tendremos todo lo que esta necesitará, en nuestro caso se llamará `playbook.yml`
+```
+- hosts: all
+  sudo: yes
+  remote_user: vagrant
+
+  tasks:
+  - name: Actualizacion
+    become: true
+    command: apt-get update
+
+  - name: Instalar Python
+    become: true
+    command: apt-get install python3
+
+  - name: Instalar Pip
+    become: true
+    command: apt-get install python3-pip python3-setuptools
+
+  - name: Instalar Git
+    become: true
+    command: apt-get install git
+
+  - name: Actualizar pip
+    command: pip3 install --upgrade pip
+
+
+```
+
 
 
 
 
 En este pasó se ejecutará el fichero de provisionamiento, pero antes deberemos añadir nuestro host  en el fichero : `/etc/ansible/hosts`
-podremos poner, tanto nuestra IP de la máquina (la cual miramos en Azure Portal) o nuestra dirección en nuestro caso: `noticieroapp.westeurope.cloudapp.azure.com `
+podremos poner, tanto nuestra IP de la máquina (la cual miramos en Azure Portal) o nuestra dirección en nuestro caso: `noticiero.westeurope.cloudapp.azure.com `
 
 En el caso en que nuestro **playbook.yml** no se haya ejecutado a la hora de crear la máquina, lo podremos hacer desde terminal con esta orden:
 
-`ansible-playbook provision/playbook.yml
+`vagrant provision
 `
 
 
 ## Despliege : Fabfile
 
  Para hacer el despliegue tendremos que crear el archivo `fabfile.py` que realizará una serie de ordenes de forma remota mediante ssh.
+```
+from fabric.api import *
+from fabric.contrib.console import confirm
+import os
+
+
+# Definimos una variable de entorno con el host al que nos vamos a conectar
+# y el nombre de usuario
+env.user = "vagrant"
+env.host = ['noticiero.westeurope.cloudapp.azure.com']
+
+
+def Desinstalar():
+	#Borramos el codigo antiguo
+	run("sudo rm -rf ./ProyectoIV-BOT")
+
+def Instalar():
+	#Instalamos el servicio clonando eliminando el codigo anterior e instalando los requerimientos
+	Desinstalar()
+	run("git clone https://github.com/natalia2911/ProyectoIV-BOT")
+	with cd("ProyectoIV-BOT"):
+		run('pip3 install --user -r requirements.txt')
+
+def Actualizar():
+	#Hacemos un pull de proyecto para descargar las actualizaciones, y volvemos a instalar los requerimientos
+	with cd("ProyectoIV-BOT"):
+		run('git pull')
+		run('pip3 install --user -r requirements.txt')
+
+
+def Iniciar():
+	#Iniciamos el servicio
+	with cd("ProyectoIV-BOT/src/"):
+		sudo("gunicorn noticiero-app:app 0.0.0.0:80 --log-file - &")
+```
  Las tareas que puede realizar es conectarse al servidor remoto, actualizar el repositorio, borrar los datos del código antiguo..
 
 Las funciones que hemos definido son:
@@ -144,25 +216,23 @@ Las funciones que hemos definido son:
  - Desinstalar: borra todo el repositorio, el código anterior
  - Instalar: se instala la aplicación
  - Iniciar: lanza la aplicación y la ejecuta en segundo plano.
- -
+ - Actualizar : actualiza la aplicación, haciéndole un pull al repositorio, y volviendo a instalar los requerimientos
+
 ![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/desinstalar.png)
 ![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/instalar.png)
 ![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/iniciar.png)
+![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/actualizar.png)
 
 Para poder probar las funciones del despliegue:
 
-`fab -f despliegue/fabfile.py -H vagrant@noticieroapp.westeurope.cloudapp.azure.com <Iniciar/Instalar/Desinstalar>`
+`fab -f despliegue/fabfile.py -H vagrant@noticiero.westeurope.cloudapp.azure.com <Iniciar/Instalar/Desinstalar/Actualizar>`
 
 Por último, el despliegue final lo hemos realizado:
 
-`IP : 13.80.251.123`
+`IP : 13.94.228.215`
 
-`DNS : noticieroapp.westeurope.cloudapp.azure.com`
+`DNS : noticiero.westeurope.cloudapp.azure.com`
 
-Podemos comprobar que ahora la maquina virtual está efectivamente ejecutando el servicio:
-
-![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/ip.png)
-![](https://github.com/natalia2911/ProyectoIV-BOT/blob/master/img/dns.png)
 
 Aquí me gustaría hacer un apunte sobre nuestro fichero **fabfile**, en el podríamos haber puesto la ejecución de los test de la siguiente manera:
 

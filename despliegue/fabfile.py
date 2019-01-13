@@ -6,7 +6,7 @@ import os
 # Definimos una variable de entorno con el host al que nos vamos a conectar
 # y el nombre de usuario
 env.user = "vagrant"
-env.host = ['noticieroapp.westeurope.cloudapp.azure.com']
+env.host = ['noticiero.westeurope.cloudapp.azure.com']
 
 
 def Desinstalar():
@@ -18,10 +18,16 @@ def Instalar():
 	Desinstalar()
 	run("git clone https://github.com/natalia2911/ProyectoIV-BOT")
 	with cd("ProyectoIV-BOT"):
-		run('pip3 install -r requirements.txt')
+		run('pip3 install --user -r requirements.txt')
+
+def Actualizar():
+	#Hacemos un pull de proyecto para descargar las actualizaciones, y volvemos a instalar los requerimientos
+	with cd("ProyectoIV-BOT"):
+		run('git pull')
+		run('pip3 install --user -r requirements.txt')
 
 
 def Iniciar():
 	#Iniciamos el servicio
 	with cd("ProyectoIV-BOT/src/"):
-		sudo("gunicorn noticiero-app:app --log-file - &")
+		sudo("gunicorn noticiero-app:app 0.0.0.0:80 --log-file - &")

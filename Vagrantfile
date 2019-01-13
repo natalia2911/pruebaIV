@@ -10,8 +10,8 @@ Vagrant.configure("2") do |config|
 
   # Le especificamos la clave, para la conexión mediante ssh de la máquina.
 	config.ssh.private_key_path = "~/.ssh/id_rsa"
-
-  # Configuración de la máquina (proveedor) donde vamos a crear el host de la máquina:
+  
+  	# Configuración de la máquina (proveedor) donde vamos a crear el host de la máquina:
 	config.vm.provider :azure do |noticiero, override|
 
 		# Variables de entorno y parámetros, necesarios para crear nuestra máquina con Azure.
