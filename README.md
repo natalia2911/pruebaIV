@@ -7,7 +7,6 @@ Este es el repositorio relacionado con el proyecto realizado por Natalia María 
 
 
 ## Descripción del proyecto
----
 
 Mi proyecto va a basarse en una serie de microservicios en la nube en los que aparezcan un microservicio encargado de la gestión de los exámenes que puede tener un alumno matriculado, otro microservicio que gestione los alumnos, y otro que se encargue de mandarle mensajes al alumno.
 
@@ -15,8 +14,8 @@ Estos microservicios están pensados para incluirse en un ***calendario personal
 
 [Información más detallada sobre el proyecto](https://github.com/natalia2911/Proyecto-CloudComputing/blob/master/Documentación/DescripcionProyecto.md)
 
-### Arquitectura
----
+## Arquitectura
+
 
 Nuestro proyecto se va a basar en una arquitectura de microservicios.
 Hemos pensado que cada uno de estos microservicios puedan estar implementados en lenguajes diferentes.
@@ -36,9 +35,9 @@ RabbitMQ es el intermediario de mensajes de código abierto más usado. Lo hemos
 
 [Más información sobre RabbitMQ](https://www.rabbitmq.com/)
 
-####Diagrama de la arquitectura
+### Diagrama de la arquitectura
 ---
-![diagramaArquitectura]((https://github.com/natalia2911/Proyecto-CloudComputing/blob/master/img/diagrama.png)
+![diagramaArquitectura](https://github.com/natalia2911/Proyecto-CloudComputing/blob/master/img/diagrama.png)
 
 
 ## Licencia
